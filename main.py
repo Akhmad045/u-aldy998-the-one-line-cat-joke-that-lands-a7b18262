@@ -28,6 +28,8 @@ def validate(text):
         )
     if text.strip() == "":
         raise ValueError("entry is only whitespace")
+    if text != text.strip():
+        raise ValueError("entry has leading or trailing whitespace")
     if "\n" in text or "\r" in text:
         raise ValueError("entry must be a single line")
     return text
@@ -40,6 +42,7 @@ def self_test():
         (" ", "whitespace-only"),
         ("x" * 201, "201 chars"),
         ("a\nb", "multi-line"),
+        (" padded ", "leading/trailing whitespace"),
     ]
     for text, label in cases:
         try:
@@ -48,9 +51,14 @@ def self_test():
             print(f"self-test ok: rejected {label}: {exc}")
         else:
             raise SystemExit(f"self-test FAIL: {label} was accepted")
-    # boundary: exactly 200 chars must pass
+    # boundaries: 1 char and exactly 200 chars must pass
+    validate("y")
+    print("self-test ok: 1-char boundary accepted")
     validate("y" * 200)
     print("self-test ok: 200-char boundary accepted")
+    # the entry itself must pass its own gate
+    validate(ENTRY)
+    print("self-test ok: entry passes the gate")
     print("self-test: all cases passed")
     return 0
 
